@@ -19,7 +19,7 @@ const Home = () => {
 
       try {
         // Make the API request with the token in the headers
-        const response = await axios.get('http://192.168.2.202:5000/api/user', {
+        const response = await axios.get('http://your-backend.onrender.com/api/user', {
           headers: {
             Authorization: `Bearer ${token}`, // Include token in Authorization header
           },

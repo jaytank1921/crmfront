@@ -15,7 +15,7 @@ const Docs = () => {
   // Fetch agreements from the server
   const fetchAgreements = async () => {
     try {
-      const response = await fetch('http://192.168.2.202:5000/api/agreements');
+      const response = await fetch('http://your-backend.onrender.com/api/agreements');
       if (!response.ok) {
         throw new Error('Failed to fetch agreements');
       }
@@ -24,7 +24,7 @@ const Docs = () => {
     } catch (error) {
       console.error('Error fetching agreements:', error);
       setError('Could not load agreements: ' + error.message);
-    }
+    } 
   };
 
   // UseEffect to fetch data on component mount
@@ -41,7 +41,7 @@ const Docs = () => {
     formData.append('doc', doc);
 
     try {
-      const response = await fetch('http://192.168.2.202:5000/api/agreements', {
+      const response = await fetch('http://your-backend.onrender.com/api/agreements', {
         method: 'POST',
         body: formData,
       });
@@ -101,7 +101,7 @@ const Docs = () => {
                 <td>{agreement.propertyType}</td>
                 <td>
                   <a 
-                    href={`http://192.168.2.202:5000/uploads/${agreement.doc}`} 
+                    href={`http://your-backend.onrender.com/uploads/${agreement.doc}`} 
                     target="_blank" 
                     rel="noopener noreferrer"
                   >

@@ -16,7 +16,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post('http://192.168.2.202:5000/login', { email, password });
+      const response = await axios.post('http://your-backend.onrender.com/login', { email, password });
       console.log('Response:', response); // Debug the response
       const token = response.data.token;
 
