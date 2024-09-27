@@ -28,7 +28,7 @@ const AddUser = () => {
         };
 
         try {
-            const response = await axios.post('http://your-backend.onrender.com/api/add-user', userData);
+            const response = await axios.post('http://192.168.2.202:5000/api/add-user', userData);
             setSuccess('User added successfully!');
             setError('');
         } catch (err) {

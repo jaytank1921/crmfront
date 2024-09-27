@@ -15,7 +15,7 @@ const Docs = () => {
   // Fetch agreements from the server
   const fetchAgreements = async () => {
     try {
-      const response = await fetch('http://your-backend.onrender.com/api/agreements');
+      const response = await fetch('http://192.168.2.202:5000/api/agreements');
       if (!response.ok) {
         throw new Error('Failed to fetch agreements');
       }
@@ -41,7 +41,7 @@ const Docs = () => {
     formData.append('doc', doc);
 
     try {
-      const response = await fetch('http://your-backend.onrender.com/api/agreements', {
+      const response = await fetch('http://192.168.2.202:5000/api/agreements', {
         method: 'POST',
         body: formData,
       });
@@ -69,15 +69,15 @@ const Docs = () => {
     }
   };    
 
-  const handleFileChange = (e) => {
-    const file = e.target.files[0];
-    if (file && file.type === 'application/pdf') {
-      setDoc(file);
-    } else {
-      alert('Please upload a valid PDF file.');
-      setDoc(null);
-    }
-  };
+  // const handleFileChange = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file && file.type === 'application/pdf') {
+  //     setDoc(file);
+  //   } else {
+  //     alert('Please upload a valid PDF file.');
+  //     setDoc(null);
+  //   }
+  // };
 
   return (
     <div>
@@ -101,7 +101,7 @@ const Docs = () => {
                 <td>{agreement.propertyType}</td>
                 <td>
                   <a 
-                    href={`http://your-backend.onrender.com/uploads/${agreement.doc}`} 
+                    href={`http://192.168.2.202:5000/uploads/${agreement.doc}`} 
                     target="_blank" 
                     rel="noopener noreferrer"
                   >

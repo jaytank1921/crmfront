@@ -13,11 +13,10 @@ const Leads = () => {
   const [formVisible, setFormVisible] = useState(false);
   const [leadsData, setLeadsData] = useState([]);
 
-  // Fetch leads data from the backend when the component mounts
   useEffect(() => {
     const fetchLeadsData = async () => {
       try {
-        const response = await axios.get('http://your-backend.onrender.com/api/leads');
+        const response = await axios.get('http://192.168.2.202:5000/api/leads');
         setLeadsData(response.data);
       } catch (error) {
         console.error('Error fetching leads:', error);
@@ -39,17 +38,15 @@ const Leads = () => {
     };
 
     try {
-      const response = await axios.post('http://your-backend.onrender.com/api/leads', newLead);
+      const response = await axios.post('http://192.168.2.202:5000/api/leads', newLead);
       console.log('Lead added:', response.data);
-      // Clear form fields after submission
       setContactValue('');
       setFieldValue('');
       setNameValue('');
       setAddressValue('');
       setDocTypeValue('');
-      setFormVisible(false); // Hide the form
-      // Re-fetch leads data to update the table
-      const updatedLeads = await axios.get('http://your-backend.onrender.com/api/leads');
+      setFormVisible(false);
+      const updatedLeads = await axios.get('http://192.168.2.202:5000/api/leads');
       setLeadsData(updatedLeads.data);
     } catch (error) {
       console.error('Error adding lead:', error.response ? error.response.data : error.message);
@@ -57,7 +54,7 @@ const Leads = () => {
   };
 
   return (
-    <div>
+    <div className="container">
       <h1>Leads</h1>
       <Navbar />
 
@@ -130,7 +127,6 @@ const Leads = () => {
       <Link to="/home">
         <button className="home-button">Home page</button>
       </Link>
-
     </div>
   );
 };

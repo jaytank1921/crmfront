@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import Navbar from './Navbar';
+import './Home.css'; // Import the CSS file
 
 const Home = () => {
   const [user, setUser] = useState(null);
@@ -9,19 +10,18 @@ const Home = () => {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      // Get the token from localStorage
       const token = localStorage.getItem('authToken');
 
       if (!token) {
         setError('No token found, please log in.');
+        setLoading(false);
         return;
       }
 
       try {
-        // Make the API request with the token in the headers
-        const response = await axios.get('http://your-backend.onrender.com/api/user', {
+        const response = await axios.get('http://192.168.2.202:5000/api/user', {
           headers: {
-            Authorization: `Bearer ${token}`, // Include token in Authorization header
+            Authorization: `Bearer ${token}`,
           },
         });
         setUser(response.data);
@@ -35,14 +35,13 @@ const Home = () => {
     fetchUserData();
   }, []);
 
-//if (loading) return <p>Loading...</p>;
-   //if (error) return <p>{error}</p>;
+  //if (loading) return <p>Loading...</p>;
+//  if (error) return <p>{error}</p>;
 
   return (
-    <div>
+    <div className="container">
       <Navbar />
       <h1>Welcome to the Home Page!</h1>
-      <p>This is the home page content.</p>
 
       {user && (
         <div className="profile-section">
