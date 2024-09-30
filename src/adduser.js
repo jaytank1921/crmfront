@@ -1,6 +1,6 @@
-// src/AddUser.js
 import React, { useState } from 'react';
 import axios from 'axios';
+
 
 const AddUser = () => {
     const [email, setEmail] = useState('');
@@ -10,12 +10,22 @@ const AddUser = () => {
     const [contact, setContact] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [loading, setLoading] = useState(false);
+
+    const isPasswordStrong = (password) => {
+        return /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d]{8,}$/.test(password);
+    };
 
     const handleAddUser = async (e) => {
         e.preventDefault();
         
         if (!email || !password || !name || !address || !contact) {
             setError('Please fill in all fields.');
+            return;
+        }
+
+        if (!isPasswordStrong(password)) {
+            setError('Password must be at least 8 characters long, contain one uppercase letter, one lowercase letter, and one number.');
             return;
         }
 
@@ -28,12 +38,22 @@ const AddUser = () => {
         };
 
         try {
+            setLoading(true); // Start loading
             const response = await axios.post('http://192.168.2.202:5000/api/add-user', userData);
             setSuccess('User added successfully!');
             setError('');
+
+            // Reset form fields
+            setEmail('');
+            setPassword('');
+            setName('');
+            setAddress('');
+            setContact('');
         } catch (err) {
             setError(err.response?.data?.message || 'An error occurred');
             setSuccess('');
+        } finally {
+            setLoading(false); // Stop loading
         }
     };
 
@@ -63,7 +83,9 @@ const AddUser = () => {
                     <label>Contact:</label>
                     <input type="text" value={contact} onChange={(e) => setContact(e.target.value)} required />
                 </div>
-                <button type="submit">Add User</button>
+                <button type="submit" disabled={loading}>
+                    {loading ? 'Adding...' : 'Add User'}
+                </button>
             </form>
         </div>
     );

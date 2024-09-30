@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import './Login.css';
 
 const Login = () => {
@@ -8,6 +8,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -16,20 +17,33 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/login`, { email, password });
-      console.log('Response:', response); // Debug the response
-      const token = response.data.token;
+      console.log({ email, password });
+      console.log('API URL:', process.env.REACT_APP_API_URL);
+
+      const response = await axios.post(`${process.env.REACT_APP_API_URL}/login`, {
+        email,
+        password,
+      });
+            const token = response.data.token;
 
       if (token) {
         localStorage.setItem('token', token);
-        // alert(response.data.message);
+        setEmail('');
+        setPassword('');
         navigate('/home');
       } else {
-        throw new Error('No token received');
+        throw new Error('No token received from server');
       }
     } catch (err) {
-      console.error('Login request error:', err); // Log the full error
-      setError(err.response?.data?.message || 'An error occurred during login');
+      console.error('Login error:', err);
+      if (err.response) {
+        const message = err.response?.data?.message || 'Invalid email or password.';
+        setError(message);
+      } else if (err.request) {
+        setError('No response from server. Please check your network connection.');
+      } else {
+        setError('An error occurred during login. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -48,19 +62,37 @@ const Login = () => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
+            disabled={loading}
           />
         </div>
-        <div className="form-group">
+
+        <div className="form-group password-group">
           <label htmlFor="password">Password:</label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-          />
+          <div className="password-input-container">
+            <input
+              type={showPassword ? 'text' : 'password'}
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              disabled={loading}
+            />
+            <button
+              type="button"
+              className="toggle-password"
+              style={{width:'7%'}}
+              onClick={() => setShowPassword(!showPassword)}
+              aria-label={showPassword ? 'Hide password' : 'Show password'}
+            >
+              {showPassword ? '👁️' : '🙈'}
+            </button>
+          </div>
         </div>
-        <button type="submit" disabled={loading}>
+
+        <p>
+          Don't have an account? <Link to="/register">Register here</Link>
+        </p>
+        <button type="submit" disabled={loading || !email || !password}>
           {loading ? 'Logging in...' : 'Login'}
         </button>
       </form>

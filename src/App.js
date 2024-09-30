@@ -57,6 +57,7 @@ import Agents from './Agents';
 import AddUser from './adduser'; // Import your new component
 import Docs from './Docs';
 import AddAgreement from './AddAgreement';
+import Register from './register';
  
 function App() {
   return (
@@ -67,6 +68,7 @@ function App() {
         <Route path="/adduser" element={<AddUser />} /> {/* Add route for AddUser */}
         <Route path="/leads" element={<Leads />} />
         <Route path="/add-agreement" component={AddAgreement} />
+        <Route path="/Register" element={<Register />} />
 
         <Route path="/owners" element={<Owners />} />
         <Route path="/agents" element={<Agents />} />

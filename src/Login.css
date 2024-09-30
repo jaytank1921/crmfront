@@ -46,3 +46,34 @@
     margin-bottom: 15px;
   }
   
+  .password-group {
+    position: relative;
+  }
+  
+  .password-input-container {
+    display: flex;
+    align-items: center; /* Align items vertically */
+    position: relative; /* Set positioning context */
+  }
+  
+  .password-input-container input {
+    flex: 1; /* Allow input to take available space */
+    padding: 10px 10px 10px 10px; /* Add padding to accommodate button */
+    border: 1px solid #ccc; /* Add border */
+    border-radius: 4px; /* Rounded corners */
+  }
+  
+  .toggle-password {
+    background: transparent; /* No background */
+    border: none; /* Remove border */
+    cursor: pointer; /* Change cursor to pointer */
+    position: absolute; /* Position button absolutely */
+    right: 10px; /* Align it to the right */
+    top: 50%; /* Center it vertically */
+    transform: translateY(-50%); /* Adjust for perfect centering */
+    font-size: 1.2em; /* Adjust size of the icon */
+    padding: 0; /* No padding */
+    margin: 0; /* No margin */
+  }
+
+  

@@ -40,16 +40,26 @@ const Leads = () => {
     try {
       const response = await axios.post('http://192.168.2.202:5000/api/leads', newLead);
       console.log('Lead added:', response.data);
+      // Clear input fields
       setContactValue('');
       setFieldValue('');
       setNameValue('');
       setAddressValue('');
       setDocTypeValue('');
       setFormVisible(false);
-      const updatedLeads = await axios.get('http://192.168.2.202:5000/api/leads');
-      setLeadsData(updatedLeads.data);
+      // Fetch updated leads data
+      fetchLeadsData(); // Re-fetch the data after adding a new lead
     } catch (error) {
       console.error('Error adding lead:', error.response ? error.response.data : error.message);
+    }
+  };
+
+  const fetchLeadsData = async () => {
+    try {
+      const response = await axios.get('http://192.168.2.202:5000/api/leads');
+      setLeadsData(response.data);
+    } catch (error) {
+      console.error('Error fetching leads:', error);
     }
   };
 
