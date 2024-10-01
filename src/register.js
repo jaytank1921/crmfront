@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { createClient } from '@supabase/supabase-js';
 import './Register.css'; // You can style it accordingly
+
+// Initialize the Supabase client
+const supabase = createClient(process.env.REACT_APP_SUPABASE_URL, process.env.REACT_APP_SUPABASE_ANON_KEY);
 
 const Register = () => {
     const [name, setName] = useState('');
@@ -15,21 +18,31 @@ const Register = () => {
         e.preventDefault();
         setError(''); // Clear previous errors
         setLoading(true); // Set loading before making the request
-
+    
         try {
-            // Make registration request to backend
-            const response = await axios.post('http://192.168.2.202:5000/api/add-user', { name, email, password });
-            console.log(response.data); // Handle successful registration
-
-            // Redirect to login page or home
-            navigate('/login'); // Redirect after successful registration
+            const { data, error } = await supabase.auth.signUp({
+                email,
+                password,
+                options: {
+                    data: { full_name: name },
+                },
+            });
+    
+            if (error) throw error;
+    
+            if (data.user && !data.user.confirmed_at) {
+                // Notify the user to check their email for confirmation
+                setError('Please check your email to confirm your account.');
+            }
+    
+            navigate('/'); // Redirect to login after successful registration
         } catch (err) {
-            // Display appropriate error message
-            setError(err.response?.data?.message || 'An error occurred during registration. Please try again.');
+            setError(err.message || 'An error occurred during registration.');
         } finally {
             setLoading(false); // Stop loading after request is completed
         }
     };
+    
 
     return (
         <div className="register-container">

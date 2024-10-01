@@ -64,7 +64,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/home" element={<Home />} />
+        <Route path="/Home" element={<Home />} />
         <Route path="/adduser" element={<AddUser />} /> {/* Add route for AddUser */}
         <Route path="/leads" element={<Leads />} />
         <Route path="/add-agreement" component={AddAgreement} />

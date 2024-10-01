@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
-import './Docs.css'; // Import your CSS file
+import './Docs.css';
+
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 const Docs = () => {
   const [showForm, setShowForm] = useState(false);
@@ -9,81 +14,73 @@ const Docs = () => {
   const [propertyType, setPropertyType] = useState('');
   const [doc, setDoc] = useState(null);
   const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState(''); // For error handling
-  const [agreements, setAgreements] = useState([]); // State to hold agreements
+  const [error, setError] = useState('');
+  const [agreements, setAgreements] = useState([]);
 
-  // Fetch agreements from the server
+  // Fetch agreements from Supabase
   const fetchAgreements = async () => {
     try {
-      const response = await fetch('http://192.168.2.202:5000/api/agreements');
-      if (!response.ok) {
-        throw new Error('Failed to fetch agreements');
-      }
-      const data = await response.json();
-      setAgreements(data); // Set fetched agreements to state
+      const { data, error } = await supabase.from('agreements').select('*');
+      if (error) throw error;
+      setAgreements(data);
     } catch (error) {
       console.error('Error fetching agreements:', error);
       setError('Could not load agreements: ' + error.message);
-    } 
+    }
   };
 
-  // UseEffect to fetch data on component mount
   useEffect(() => {
     fetchAgreements();
   }, []);
 
+  // Handle form submission
   const handleSubmit = async (e) => {
     e.preventDefault();
-
-    const formData = new FormData();
-    formData.append('name', name);
-    formData.append('propertyType', propertyType);
-    formData.append('doc', doc);
-
+  
+    if (!doc) {
+      setError('Please select a document to upload.');
+      return;
+    }
+  
     try {
-      const response = await fetch('http://192.168.2.202:5000/api/agreements', {
-        method: 'POST',
-        body: formData,
-      });
-
-      // Check if the response is ok
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Unknown error occurred');
-      }
-
-      // Only access responseData after checking the response is OK
-      const responseData = await response.json();
-      console.log('Agreement added successfully:', responseData);
-      setSubmitted(true);
-      setName(''); // Clear input fields
-      setPropertyType('');
-      setDoc(null); // Reset the file input
-
-      // Refetch agreements to include the newly added agreement
-      fetchAgreements();
-
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const binaryData = reader.result; // This is the binary data of the PDF
+  
+        // Create a unique file name by adding a timestamp
+        const uniqueFileName = `${Date.now()}_${doc.name}`;
+  
+        // Insert agreement data into the table
+        const { error: agreementError } = await supabase.from('agreements').insert([
+          {
+            name: name,
+            property_type: propertyType,
+            doc: uniqueFileName, // Store the unique filename in the doc column
+          },
+        ]);
+  
+        if (agreementError) throw agreementError;
+  
+        console.log('Agreement added successfully');
+        setSubmitted(true);
+        setName('');
+        setPropertyType('');
+        setDoc(null);
+        fetchAgreements(); // Refetch agreements
+      };
+  
+      reader.readAsArrayBuffer(doc); // Read the file as binary data
     } catch (error) {
       console.error('Error submitting form:', error.message);
       setError('There was a problem submitting your data: ' + error.message);
     }
-  };    
-
-  // const handleFileChange = (e) => {
-  //   const file = e.target.files[0];
-  //   if (file && file.type === 'application/pdf') {
-  //     setDoc(file);
-  //   } else {
-  //     alert('Please upload a valid PDF file.');
-  //     setDoc(null);
-  //   }
-  // };
+  };
+  
 
   return (
     <div>
       <h1>Docs Page</h1>
       <Navbar />
-
 
       <table>
         <thead>
@@ -98,14 +95,14 @@ const Docs = () => {
             agreements.map((agreement, index) => (
               <tr key={index}>
                 <td>{agreement.name}</td>
-                <td>{agreement.propertyType}</td>
+                <td>{agreement.property_type}</td>
                 <td>
-                  <a 
-                    href={`http://192.168.2.202:5000/uploads/${agreement.doc}`} 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                  >
-                    {agreement.doc}
+                <a 
+    href={`https://your-project-ref.supabase.co/storage/v1/object/documents/agreements/${agreement.doc}`} // Ensure this URL is correct
+    target="_blank" 
+    rel="noopener noreferrer"
+  >
+                    View Document
                   </a>
                 </td>
               </tr>
@@ -131,7 +128,7 @@ const Docs = () => {
         <div style={{ marginTop: '20px' }}>
           <h2>Add Agreement</h2>
           {submitted && <p>Agreement added successfully!</p>}
-          {error && <p style={{ color: 'red' }}>{error}</p>} {/* Error message */}
+          {error && <p style={{ color: 'red' }}>{error}</p>}
           <form onSubmit={handleSubmit}>
             <input 
               type="text" 
@@ -147,12 +144,20 @@ const Docs = () => {
               placeholder="Property Type" 
               required 
             />
-          <input 
-   type="file" 
-   onChange={(e) => setDoc(e.target.files[0])} 
-   required 
-/>
-
+            <input 
+              type="file" 
+              onChange={(e) => {
+                const file = e.target.files[0];
+                if (file && file.type === 'application/pdf') {
+                  setDoc(file);
+                  setError(''); // Clear any previous error
+                } else {
+                  setDoc(null); // Reset the file input
+                  setError('Please upload a valid PDF file.');
+                }
+              }} 
+              required 
+            />
             <button type="submit">Submit</button>
           </form>
         </div>

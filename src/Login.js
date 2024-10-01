@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
+import { createClient } from '@supabase/supabase-js';
 import './Login.css';
+
+// Initialize Supabase client
+const supabase = createClient(process.env.REACT_APP_SUPABASE_URL, process.env.REACT_APP_SUPABASE_ANON_KEY);
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -10,44 +13,36 @@ const Login = () => {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+  //console.log('Supabase URL:', process.env.REACT_APP_SUPABASE_URL);
+//console.log('Supabase Anon Key:', process.env.REACT_APP_SUPABASE_ANON_KEY);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
 
-    try {
-      console.log({ email, password });
-      console.log('API URL:', process.env.REACT_APP_API_URL);
+const handleSubmit = async (e) => {
+  e.preventDefault();
+  setError('');
+  setLoading(true);
 
-      const response = await axios.post(`${process.env.REACT_APP_API_URL}/login`, {
-        email,
-        password,
-      });
-            const token = response.data.token;
+  try {
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
 
-      if (token) {
-        localStorage.setItem('token', token);
-        setEmail('');
-        setPassword('');
-        navigate('/home');
-      } else {
-        throw new Error('No token received from server');
-      }
-    } catch (err) {
-      console.error('Login error:', err);
-      if (err.response) {
-        const message = err.response?.data?.message || 'Invalid email or password.';
-        setError(message);
-      } else if (err.request) {
-        setError('No response from server. Please check your network connection.');
-      } else {
-        setError('An error occurred during login. Please try again.');
-      }
-    } finally {
-      setLoading(false);
+    if (error) {
+      throw error;
     }
-  };
+
+    if (data.session) {
+      localStorage.setItem('token', data.session.access_token);
+      setEmail('');
+      setPassword('');
+      navigate('/home');
+    }
+  } catch (err) {
+    console.error('Login error:', err);
+    setError(err.message || 'An error occurred during login. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="login-container">
