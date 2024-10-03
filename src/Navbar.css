@@ -1,25 +1,43 @@
 /* src/Navbar.css */
 .navbar {
-    background-color: #333;
-    padding: 10px;
-  }
-  
+  background-color: #333;
+  padding: 10px;
+}
+
+/* Desktop view: keep items inline */
+.navbar ul {
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+  display: flex; /* Flexbox for better control */
+  justify-content: space-around; /* Space around items */
+}
+
+.navbar ul li {
+  margin: 0 15px;
+}
+
+.navbar ul li a {
+  color: white;
+  text-decoration: none;
+}
+
+.navbar ul li a:hover {
+  text-decoration: underline;
+}
+
+/* Mobile view: make items vertical */
+@media (max-width: 768px) {
   .navbar ul {
-    list-style-type: none;
-    padding: 0;
+    flex-direction: column; /* Stack items vertically */
+    align-items: center; /* Center them */
   }
-  
+
   .navbar ul li {
-    display: inline;
-    margin-right: 20px;
+    margin: 10px 0;
   }
-  
+
   .navbar ul li a {
-    color: white;
-    text-decoration: none;
+    font-size: 18px; /* Make the text a bit larger */
   }
-  
-  .navbar ul li a:hover {
-    text-decoration: underline;
-  }
-  
+}

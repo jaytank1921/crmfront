@@ -1,120 +1,206 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { createClient } from '@supabase/supabase-js';
 import Navbar from './Navbar';
-import './Agents.css';
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  CircularProgress,
+  Paper,
+  List,
+  ListItem,
+  ListItemText,
+  Divider,
+} from '@mui/material';
 
+// Create a Supabase client instance
+const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
+const supabaseKey = process.env.REACT_APP_SUPABASE_ANON_KEY;
+const supabase = createClient(supabaseUrl, supabaseKey);
 
-
-// Main Agents Component
 const Agents = () => {
-    const [comments, setComments] = useState([]);
-    const [author, setAuthor] = useState('');
-    const [text, setText] = useState('');
+  const [comments, setComments] = useState([]);
+  const [author, setAuthor] = useState('');
+  const [text, setText] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-    const handleCommentSubmit = (e) => {
-        e.preventDefault();
-        const newComment = {
-            id: Date.now(), // Unique ID for each comment
-            author: author,
-            text: text,
-            timestamp: new Date().toLocaleString(),
-            replies: [],
-        };
-        setComments([...comments, newComment]);
-        setAuthor('');
-        setText('');
+  useEffect(() => {
+    const fetchComments = async () => {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('comments')
+        .select(`
+            id, name, content, created_at,
+            replies (id, name, reply_content, created_at)
+        `);
+      setLoading(false);
+      if (error) {
+        setErrorMessage('Error fetching comments.');
+        console.error(error);
+      } else {
+        setComments(data);
+      }
     };
-    // Reply Component
-const Reply = ({ reply }) => {
-  return (
-      <div className="reply">
-          <p><strong>{reply.author}:</strong> {reply.text}</p>
-          <p className="timestamp">{reply.timestamp}</p>
-      </div>
-  );
-};
 
-// Comment Component
-const Comment = ({ comment, onReply }) => {
-  const [showReplyInput, setShowReplyInput] = useState(false);
-  const [replyText, setReplyText] = useState('');
+    fetchComments();
+  }, []);
 
-  const handleReplySubmit = (e) => {
-      e.preventDefault();
-      onReply(comment.id, replyText);
-      setReplyText('');
-      setShowReplyInput(false);
+  const handleCommentSubmit = async (e) => {
+    e.preventDefault();
+    if (!author || !text) return;
+
+    setLoading(true);
+    const { data, error } = await supabase
+      .from('comments')
+      .insert([{ name: author, content: text }]);
+
+    setLoading(false);
+    if (error) {
+      console.error('Error adding comment:', error);
+      setErrorMessage('Error adding comment.');
+      return;
+    }
+    setComments([...comments, { ...data[0], replies: [] }]);
+    setAuthor('');
+    setText('');
   };
 
-  return (
-      <div className="comment">
-          <p><strong>{comment.author}:</strong> {comment.text}</p>
-          <p className="timestamp">{comment.timestamp}</p>
-          <button onClick={() => setShowReplyInput(!showReplyInput)}>
-              {showReplyInput ? 'Cancel' : 'Reply'}
-          </button>
-          {showReplyInput && (
-              <form onSubmit={handleReplySubmit}>
-                  <textarea
-                      placeholder="Add a reply..."
-                      value={replyText}
-                      onChange={(e) => setReplyText(e.target.value)}
-                      required
-                  />
-                  <button type="submit">Submit Reply</button>
-              </form>
-          )}
-          <div className="replies-list">
-              {comment.replies.map((reply, index) => (
-                  <Reply key={index} reply={reply} />
-              ))}
-          </div>
-      </div>
-  );
-};
+  const handleReplySubmit = async (commentId, replyText) => {
+    if (!author || !replyText) return;
 
-    const handleReplySubmit = (commentId, replyText) => {
-        const updatedComments = comments.map(comment => {
+    setLoading(true);
+    const { data, error } = await supabase
+        .from('replies')
+        .insert([{ comment_id: commentId, name: author, reply_content: replyText }]);
+
+    setLoading(false);
+    if (error) {
+        console.error('Error adding reply:', error.message);
+        setErrorMessage('Error adding reply.');
+        return;
+    }
+
+    // Make sure data is valid
+    if (data && data.length > 0) {
+        const updatedComments = comments.map((comment) => {
             if (comment.id === commentId) {
-                const newReply = {
-                    author: author,
-                    text: replyText,
-                    timestamp: new Date().toLocaleString(),
-                };
-                return { ...comment, replies: [...comment.replies, newReply] };
+                return { ...comment, replies: [...comment.replies, data[0]] };
             }
             return comment;
         });
         setComments(updatedComments);
+    }
+};
+
+
+  const ReplyComponent = ({ reply }) => (
+    <Box sx={{ mb: 1 }}>
+      <Typography variant="body2" color="text.secondary">
+        <strong>{reply.name}:</strong> {reply.reply_content}
+      </Typography>
+      <Typography variant="caption" color="text.secondary" className="timestamp">
+        {new Date(reply.created_at).toLocaleString()}
+      </Typography>
+    </Box>
+  );
+
+  const CommentComponent = ({ comment }) => {
+    const [showReplyInput, setShowReplyInput] = useState(false);
+    const [replyText, setReplyText] = useState('');
+
+    const submitReply = (e) => {
+      e.preventDefault();
+      handleReplySubmit(comment.id, replyText);
+      setReplyText('');
+      setShowReplyInput(false);
     };
 
     return (
-        <div className="agents-section">
-            <Navbar />
-            <h1>Agents Page</h1>
-            <h2>Comments</h2>
-            <form onSubmit={handleCommentSubmit}>
-                <input
-                    type="text"
-                    placeholder="Your Name"
-                    value={author}
-                    onChange={(e) => setAuthor(e.target.value)}
-                    required
-                />
-                <textarea
-                    placeholder="Add a comment..."
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    required
-                />
-                <button type="submit">Submit</button>
-            </form>
-            <div className="comments-list">
-                {comments.map((comment) => (
-                    <Comment key={comment.id} comment={comment} onReply={handleReplySubmit} />
-                ))}
-            </div>
-        </div>
+      <Paper sx={{ mb: 2, p: 2 }}>
+        <Typography variant="subtitle1">
+          <strong>{comment.name}:</strong> {comment.content}
+        </Typography>
+        <Typography variant="caption" color="text.secondary" className="timestamp">
+          {new Date(comment.created_at).toLocaleString()}
+        </Typography>
+        <Button onClick={() => setShowReplyInput(!showReplyInput)} sx={{ mt: 1 }}>
+          {showReplyInput ? 'Cancel' : 'Reply'}
+        </Button>
+        {showReplyInput && (
+          <Box component="form" onSubmit={submitReply} sx={{ mt: 1 }}>
+            <TextField
+              fullWidth
+              multiline
+              rows={2}
+              placeholder="Add a reply..."
+              value={replyText}
+              onChange={(e) => setReplyText(e.target.value)}
+              required
+              variant="outlined"
+            />
+            <Button type="submit" variant="contained" sx={{ mt: 1 }}>
+              Submit Reply
+            </Button>
+          </Box>
+        )}
+        <List sx={{ mt: 2 }}>
+          {comment.replies.map((reply) => (
+            <ListItem key={reply.id} sx={{ pl: 0 }}>
+              <ListItemText primary={<ReplyComponent reply={reply} />} />
+            </ListItem>
+          ))}
+        </List>
+        <Divider />
+      </Paper>
     );
+  };
+
+  return (
+    <div className="agents-section">
+      <Navbar />
+      <Typography variant="h4" gutterBottom>
+        Agents Page
+      </Typography>
+      <Typography variant="h5">Comments</Typography>
+      {loading && <CircularProgress />}
+      {errorMessage && (
+        <Typography color="error" variant="body2" sx={{ mt: 2 }}>
+          {errorMessage}
+        </Typography>
+      )}
+      <Box component="form" onSubmit={handleCommentSubmit} sx={{ mt: 2 }}>
+        <TextField
+          label="Your Name"
+          variant="outlined"
+          fullWidth
+          value={author}
+          onChange={(e) => setAuthor(e.target.value)}
+          required
+        />
+        <TextField
+          label="Add a comment..."
+          variant="outlined"
+          fullWidth
+          multiline
+          rows={4}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          required
+          sx={{ mt: 1 }}
+        />
+        <Button type="submit" variant="contained" sx={{ mt: 2 }}>
+          Submit
+        </Button>
+      </Box>
+      <div className="comments-list" style={{ marginTop: '20px' }}>
+        {comments.map((comment) => (
+          <CommentComponent key={comment.id} comment={comment} />
+        ))}
+      </div>
+    </div>
+  );
 };
 
 export default Agents;

@@ -2,7 +2,19 @@ import React, { useEffect, useState } from 'react';
 import { createClient } from '@supabase/supabase-js';
 import Navbar from './Navbar';
 import { Link } from 'react-router-dom';
-import './Leads.css';
+import {
+  Button,
+  TextField,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Typography,
+  Paper,
+  Box,
+} from '@mui/material';
 
 // Create a Supabase client instance
 const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
@@ -65,77 +77,100 @@ const Leads = () => {
 
   return (
     <div className="container">
-      <h1>Leads</h1>
+      <Typography variant="h4" gutterBottom>
+        Leads
+      </Typography>
       <Navbar />
 
-      <button onClick={() => setFormVisible(true)}>Create Lead</button>
+      <Button variant="contained" onClick={() => setFormVisible(true)} sx={{ mb: 2 }} style={{marginTop:'10px'}}>
+        Create Lead
+      </Button>
 
       {formVisible && (
-        <form onSubmit={handleSubmit} className="lead-form">
-          <input
-            type="text"
-            placeholder="Contact"
+        <Box component="form" onSubmit={handleSubmit} sx={{ mb: 2 }}>
+          <TextField
+            label="Contact"
+            variant="outlined"
+            fullWidth
+            margin="normal"
             value={contactValue}
             onChange={(e) => setContactValue(e.target.value)}
             required
           />
-          <input
-            type="text"
-            placeholder="Field"
+          <TextField
+            label="Field"
+            variant="outlined"
+            fullWidth
+            margin="normal"
             value={fieldValue}
             onChange={(e) => setFieldValue(e.target.value)}
             required
           />
-          <input
-            type="text"
-            placeholder="Name"
+          <TextField
+            label="Name"
+            variant="outlined"
+            fullWidth
+            margin="normal"
             value={nameValue}
             onChange={(e) => setNameValue(e.target.value)}
             required
           />
-          <input
-            type="text"
-            placeholder="Address"
+          <TextField
+            label="Address"
+            variant="outlined"
+            fullWidth
+            margin="normal"
             value={addressValue}
             onChange={(e) => setAddressValue(e.target.value)}
             required
           />
-          <input
-            type="text"
-            placeholder="Doc Type"
+          <TextField
+            label="Doc Type"
+            variant="outlined"
+            fullWidth
+            margin="normal"
             value={docTypeValue}
             onChange={(e) => setDocTypeValue(e.target.value)}
             required
           />
-          <button type="submit">Add Lead</button>
-          <button type="button" onClick={() => setFormVisible(false)}>Cancel</button>
-        </form>
+          <Button type="submit" variant="contained" sx={{ mr: 1 }}>
+            Add Lead
+          </Button>
+          <Button variant="outlined" onClick={() => setFormVisible(false)} style={{marginTop:'10px'}}>
+            Cancel
+          </Button>
+        </Box>
       )}
 
-      <table className="leads-table">
-        <thead>
-          <tr>
-            <th>Contact</th>
-            <th>Field</th>
-            <th>Name</th>
-            <th>Address</th>
-            <th>Doc Type</th>
-          </tr>
-        </thead>
-        <tbody>
-          {leadsData.map((lead, index) => (
-            <tr key={index}>
-              <td>{lead.contact}</td>
-              <td>{lead.field}</td>
-              <td>{lead.name}</td>
-              <td>{lead.address}</td>
-              <td>{lead.docType}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <TableContainer component={Paper} sx={{ mt: 2 }}>
+        <Table>
+          <TableHead>
+            <TableRow>
+              <TableCell>Contact</TableCell>
+              <TableCell>Field</TableCell>
+              <TableCell>Name</TableCell>
+              <TableCell>Address</TableCell>
+              <TableCell>Doc Type</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {leadsData.map((lead, index) => (
+              <TableRow key={index}>
+                <TableCell>{lead.contact}</TableCell>
+                <TableCell>{lead.field}</TableCell>
+                <TableCell>{lead.name}</TableCell>
+                <TableCell>{lead.address}</TableCell>
+                <TableCell>{lead.docType}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
       <Link to="/home">
-        <button className="home-button">Home page</button>
+        <Button variant="contained" sx={{ mt: 2 }}>
+          Home Page
+        </Button>
       </Link>
     </div>
   );

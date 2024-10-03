@@ -1,100 +1,124 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { createClient } from '@supabase/supabase-js';
-import './Register.css'; // You can style it accordingly
+import {
+  TextField,
+  Button,
+  Typography,
+  Container,
+  CircularProgress,
+  Box,
+} from '@mui/material';
 
 // Initialize the Supabase client
 const supabase = createClient(process.env.REACT_APP_SUPABASE_URL, process.env.REACT_APP_SUPABASE_ANON_KEY);
 
 const Register = () => {
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [loading, setLoading] = useState(false);
-    const navigate = useNavigate();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError(''); // Clear previous errors
-        setLoading(true); // Set loading before making the request
-    
-        try {
-            const { data, error } = await supabase.auth.signUp({
-                email,
-                password,
-                options: {
-                    data: { full_name: name },
-                },
-            });
-    
-            if (error) throw error;
-    
-            if (data.user && !data.user.confirmed_at) {
-                // Notify the user to check their email for confirmation
-                setError('Please check your email to confirm your account.');
-            }
-    
-            navigate('/'); // Redirect to login after successful registration
-        } catch (err) {
-            setError(err.message || 'An error occurred during registration.');
-        } finally {
-            setLoading(false); // Stop loading after request is completed
-        }
-    };
-    
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-    return (
-        <div className="register-container">
-            <h2>Register</h2>
-            
-            {/* Error message */}
-            {error && <p className="error-message">{error}</p>}
-            
-            <form onSubmit={handleSubmit}>
-                <div className="form-group">
-                    <label htmlFor="name">Name:</label>
-                    <input
-                        type="text"
-                        id="name"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                        disabled={loading} // Disable input when loading
-                    />
-                </div>
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { full_name: name },
+        },
+      });
 
-                <div className="form-group">
-                    <label htmlFor="email">Email:</label>
-                    <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        disabled={loading} // Disable input when loading
-                    />
-                </div>
+      if (error) throw error;
 
-                <div className="form-group">
-                    <label htmlFor="password">Password:</label>
-                    <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        disabled={loading} // Disable input when loading
-                    />
-                </div>
+      if (data.user && !data.user.confirmed_at) {
+        // Notify the user to check their email for confirmation
+        setError('Please check your email to confirm your account.');
+      }
 
-                {/* Display loading text when submitting */}
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Registering...' : 'Register'}
-                </button>
-            </form>
-        </div>
-    );
+      navigate('/'); // Redirect to login after successful registration
+    } catch (err) {
+      setError(err.message || 'An error occurred during registration.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Container maxWidth="xs">
+      <Box
+        display="flex"
+        flexDirection="column"
+        justifyContent="center"
+        alignItems="center"
+        mt={4}
+      >
+        <Typography variant="h4" component="h1" gutterBottom>
+          Register
+        </Typography>
+
+        {error && (
+          <Typography color="error" variant="body2" gutterBottom>
+            {error}
+          </Typography>
+        )}
+
+        <form onSubmit={handleSubmit}>
+          <TextField
+            label="Name"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+            disabled={loading}
+          />
+
+          <TextField
+            label="Email"
+            type="email"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            disabled={loading}
+          />
+
+          <TextField
+            label="Password"
+            type="password"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            disabled={loading}
+          />
+
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            fullWidth
+            sx={{ marginTop: 2 }}
+            disabled={loading}
+          >
+            {loading ? <CircularProgress size={24} /> : 'Register'}
+          </Button>
+        </form>
+      </Box>
+    </Container>
+  );
 };
 
 export default Register;

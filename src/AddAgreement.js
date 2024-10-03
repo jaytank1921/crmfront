@@ -1,7 +1,7 @@
 // src/AddAgreement.js
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import './Docs.css'; // Import your CSS file
+//import './Docs.css'; // Import your CSS file
 
 const AddAgreement = () => {
   const [name, setName] = useState('');

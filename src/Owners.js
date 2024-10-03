@@ -11,6 +11,9 @@ import {
   TableHead,
   TableRow,
   Paper,
+  Typography,
+  Button,
+  Box
 } from '@mui/material';
 
 const ownersData = [
@@ -21,39 +24,51 @@ const ownersData = [
 
 const Owners = () => {
   return (
-    
-    <TableContainer component={Paper} sx={{ width: '80%', margin: 'auto' }}>
-        <h3 style={{textAlign:'center'}}> Owners details</h3>
-        <Navbar />
+    <Box sx={{ width: '100%', p: 2 }}>
+      <Navbar /> {/* Navigation bar at the top */}
 
-      <Table width="80%">
-        <TableHead>
-          <TableRow style={{background:'skyblue'}}>
-            <TableCell sx={{ fontWeight: 'bold' }}>Property</TableCell>
-            <TableCell sx={{ fontWeight: 'bold' }}>Address</TableCell>
-            <TableCell sx={{ fontWeight: 'bold' }}>Sell or Rent</TableCell>
-            <TableCell sx={{ fontWeight: 'bold' }}>Agreement</TableCell>
-          </TableRow>
-        </TableHead>
-        <TableBody>
-          {ownersData.map(owner => (
-            <TableRow key={owner.id}>
-              <TableCell>{owner.property}</TableCell>
-              <TableCell>{owner.address}</TableCell>
-              <TableCell>{owner.type}</TableCell>
-              <TableCell>{owner.agreement}</TableCell>
+      {/* Heading */}
+      <Typography variant="h3" sx={{ textAlign: 'center', mb: 2 }}>
+        Owners Details
+      </Typography>
+
+      {/* Table */}
+      <TableContainer component={Paper} sx={{ width: '80%', margin: 'auto', boxShadow: 3 }}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ backgroundColor: 'skyblue' }}>
+              <TableCell sx={{ fontWeight: 'bold' }}>Property</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Address</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Sell or Rent</TableCell>
+              <TableCell sx={{ fontWeight: 'bold' }}>Agreement</TableCell>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      <Link to="/home">
-  <button className="home-button">Home page</button>
-</Link>
-    </TableContainer>
-    
-    
+          </TableHead>
+          <TableBody>
+            {ownersData.map(owner => (
+              <TableRow key={owner.id}>
+                <TableCell>{owner.property}</TableCell>
+                <TableCell>{owner.address}</TableCell>
+                <TableCell>{owner.type}</TableCell>
+                <TableCell>{owner.agreement}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* Button to go back to home page */}
+      <Box textAlign="center" sx={{ mt: 3 }}>
+        <Button
+          variant="contained"
+          component={Link}
+          to="/home"
+          sx={{ backgroundColor: 'skyblue', color: 'white' }}
+        >
+          Home Page
+        </Button>
+      </Box>
+    </Box>
   );
- 
 };
 
 export default Owners;

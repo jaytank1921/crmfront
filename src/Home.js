@@ -1,9 +1,9 @@
 import React, { useMemo } from 'react';
 import { Bar, Line } from 'react-chartjs-2';
 import { useTable } from 'react-table';
+import { Box, Typography, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper, Card, CardMedia,Grid } from '@mui/material';
 import Navbar from './Navbar';
 import { Chart, registerables } from 'chart.js';
-import './Home.css';
 
 Chart.register(...registerables);
 
@@ -22,8 +22,8 @@ const lineChartData = {
   labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
   datasets: [{
     label: 'Expenses',
-    data: [200, 300, 250, 400],
-    fill: false,
+    data: [200, 300, 25, 400],
+    fill: true,
     backgroundColor: 'rgba(153, 102, 255, 0.6)',
     borderColor: 'rgba(153, 102, 255, 1)',
     tension: 0.1,
@@ -57,56 +57,85 @@ const Home = () => {
   } = useTable({ columns: columnDefs, data });
 
   return (
-    <div className="container">
+    <Box p={2}>
       <Navbar />
-      <h1>Welcome to the Dashboard!</h1>
+    
 
-      <h2>Sales Chart</h2>
-      <div style={{ width: '400px', height: '300px' }}>
-        <Bar data={barChartData} />
-      </div>
+     {/* Sales and Expenses Charts Side by Side */}
+<Typography variant="h5" gutterBottom>
+  Sales and Expenses
+</Typography>
+<Grid container spacing={2} sx={{ mb: 4 }}>
+  <Grid item xs={12} md={6}>
+    <Box
+      sx={{
+        width: '100%',
+        height: '300px', // Set a fixed height to keep both charts consistent
+      }}
+    >
+      <Typography variant="h6">Sales Chart</Typography>
+      <Bar data={barChartData} />
+    </Box>
+  </Grid>
 
-      <h2>Expenses Chart</h2>
-      <div style={{ width: '400px', height: '300px' }}>
-        <Line data={lineChartData} />
-      </div>
+  <Grid item xs={12} md={6}>
+    <Box
+      sx={{
+        width: '100%',
+        height: '300px',
+      }}
+    >
+      <Typography variant="h6">Expenses Chart</Typography>
+      <Line data={lineChartData} />
+    </Box>
+  </Grid>
+</Grid>
 
-      <h2>Sample Image</h2>
-      <img 
-        src="https://www.cabkgoyal.com/wp-content/uploads/2023/05/rent-agreement.png" // Replace with the direct image URL
-        alt="Sample Rent Agreement" 
-        style={{ width: '100%', maxWidth: '600px', marginTop: '20px' }} 
-      />
+      {/* Sample Image */}
+      <Typography variant="h5" gutterBottom>
+        Sample Image
+      </Typography>
+      <Card sx={{ maxWidth: 600, mb: 4 }}>
+        <CardMedia
+          component="img"
+          height="900"
+          image="https://www.cabkgoyal.com/wp-content/uploads/2023/05/rent-agreement.png"
+          alt="Sample Rent Agreement"
+        />
+      </Card>
 
-      <h2>User Data</h2>
-      <table {...getTableProps()} style={{ width: '100%', marginTop: '20px', border: '1px solid #ddd' }}>
-        <thead>
-          {headerGroups.map(headerGroup => (
-            <tr {...headerGroup.getHeaderGroupProps()}>
-              {headerGroup.headers.map(column => (
-                <th {...column.getHeaderProps()} style={{ border: '1px solid #ddd', padding: '8px' }}>
-                  {column.render('Header')}
-                </th>
-              ))}
-            </tr>
-          ))}
-        </thead>
-        <tbody {...getTableBodyProps()}>
-          {rows.map(row => {
-            prepareRow(row);
-            return (
-              <tr {...row.getRowProps()}>
-                {row.cells.map(cell => (
-                  <td {...cell.getCellProps()} style={{ border: '1px solid #ddd', padding: '8px' }}>
-                    {cell.render('Cell')}
-                  </td>
+      {/* User Data Table */}
+      <Typography variant="h5" gutterBottom>
+        User Data
+      </Typography>
+      <TableContainer component={Paper}>
+        <Table {...getTableProps()}>
+          <TableHead>
+            {headerGroups.map(headerGroup => (
+              <TableRow {...headerGroup.getHeaderGroupProps()}>
+                {headerGroup.headers.map(column => (
+                  <TableCell {...column.getHeaderProps()}>{column.render('Header')}</TableCell>
                 ))}
-              </tr>
-            );
-          })}
-        </tbody>
-      </table>
-    </div>
+              </TableRow>
+            ))}
+          </TableHead>
+          <TableBody {...getTableBodyProps()}>
+            {rows.map(row => {
+              prepareRow(row);
+              return (
+                <TableRow {...row.getRowProps()}>
+                  {row.cells.map(cell => (
+                    <TableCell {...cell.getCellProps()}>
+                      {cell.render('Cell')}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    </Box>
   );
 };
 
