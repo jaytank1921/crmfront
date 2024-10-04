@@ -30,18 +30,32 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      // Step 1: Query users table with the provided email
+      const { data, error: queryError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('email', email)
+        .single(); // Use single() since we expect one user per email
 
-      if (error) {
-        throw error;
+      if (queryError) {
+        throw queryError;
       }
 
-      if (data.session) {
-        localStorage.setItem('token', data.session.access_token);
-        setEmail('');
-        setPassword('');
-        navigate('/home');
+      if (!data) {
+        throw new Error('User with this email does not exist');
       }
+
+      // Step 2: Compare passwords (assuming passwords are stored in plain text, but typically they should be hashed)
+      if (data.password !== password) {
+        throw new Error('Incorrect password');
+      }
+
+      // Step 3: If password matches, log the user in
+      localStorage.setItem('token', 'your-custom-token'); // You might want to generate a token or use session data
+      setEmail('');
+      setPassword('');
+      navigate('/home');
+
     } catch (err) {
       console.error('Login error:', err);
       setError(err.message || 'An error occurred during login. Please try again.');

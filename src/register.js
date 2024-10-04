@@ -17,6 +17,7 @@ const Register = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -26,23 +27,26 @@ const Register = () => {
     setError('');
     setLoading(true);
 
+    // Check if passwords match
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      setLoading(false);
+      return;
+    }
+
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: { full_name: name },
-        },
-      });
+      // Insert data into the 'user' table
+      const { error: insertError } = await supabase
+        .from('users') // Assuming your table is named 'user'
+        .insert([{ 
+          name: name, // Full name from form input
+          email: email,    // Email from form input
+          password: password // Add password if you are storing it (consider hashing in real applications)
+        }]);
 
-      if (error) throw error;
+      if (insertError) throw insertError;
 
-      if (data.user && !data.user.confirmed_at) {
-        // Notify the user to check their email for confirmation
-        setError('Please check your email to confirm your account.');
-      }
-
-      navigate('/'); // Redirect to login after successful registration
+      navigate('/'); // Redirect to the specified route after successful registration
     } catch (err) {
       setError(err.message || 'An error occurred during registration.');
     } finally {
@@ -101,6 +105,18 @@ const Register = () => {
             margin="normal"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            required
+            disabled={loading}
+          />
+
+          <TextField
+            label="Confirm Password"
+            type="password"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             required
             disabled={loading}
           />

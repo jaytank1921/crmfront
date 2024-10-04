@@ -50,23 +50,36 @@ const Agents = () => {
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!author || !text) return;
-
+  
+    // Optimistically add the comment to the UI
+    const newComment = { name: author, content: text, replies: [], id: Date.now() };
+    setComments((prevComments) => [...prevComments, newComment]);
+  
+    setAuthor('');
+    setText('');
+  
     setLoading(true);
     const { data, error } = await supabase
       .from('comments')
-      .insert([{ name: author, content: text }]);
-
+      .insert([{ name: author, content: text }])
+      .select('*');
+  
     setLoading(false);
+  
     if (error) {
       console.error('Error adding comment:', error);
       setErrorMessage('Error adding comment.');
-      return;
+    } else if (data && data.length > 0) {
+      // Update the optimistic comment with the correct data from Supabase
+      setComments((prevComments) =>
+        prevComments.map((comment) =>
+          comment.id === newComment.id ? { ...data[0], replies: [] } : comment
+        )
+      );
     }
-    setComments([...comments, { ...data[0], replies: [] }]);
-    setAuthor('');
-    setText('');
   };
-
+  
+  
   const handleReplySubmit = async (commentId, replyText) => {
     if (!author || !replyText) return;
 
